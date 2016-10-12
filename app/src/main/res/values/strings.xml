@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Acoustic</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_text_play">Play</string>
+    <string name="button_text_pause">Pause</string>
+
+    <string name="button_text_record">Record</string>
+</resources>
