@@ -4,8 +4,11 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Process;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.io.FileNotFoundException;
 
 import hust.cc.acoustic.computation.Complex;
 import hust.cc.acoustic.computation.FFT;
@@ -14,21 +17,23 @@ import hust.cc.acoustic.computation.FFT;
  * Created by cc on 2016/10/12.
  */
 
-public class AudioRecorder extends Thread{
+public class AudioRecorder implements IAudioRecorder{
 
-    private AudioRecord mAudioRecord;
-    private Context mContext;
+    /*private AudioRecord mAudioRecord;
+    //private Context mContext;
     private int miniSize = 0;
     private boolean isRecording = false;
     private boolean isClose = false;
     private boolean isFFTFormat = false;
     private boolean isInitialOk = false;
     private CallBack mCallBack;
+    private static final int sampleFrequency = 44100;
 
     private static final String TAG = "AudioRecorder";
 
-    public AudioRecorder(Context mContext){
-        this.mContext = mContext;
+    public AudioRecorder(CallBack mCallBack){
+        //this.mContext = mContext;
+        this.mCallBack = mCallBack;
         init();
     }
 
@@ -37,11 +42,16 @@ public class AudioRecorder extends Thread{
     }
 
     private void init(){
-        miniSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);//(AudioManager.STREAM_MUSIC);
-        miniSize = miniSize > 1024 ? 1024:miniSize;
+        miniSize = AudioRecord.getMinBufferSize(sampleFrequency, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);//(AudioManager.STREAM_MUSIC);
+        Log.d(TAG,"----------the minimum size buffer retreived from code: "+miniSize);
+        int size = 1024;
+        while(miniSize > size){
+            size = size * 2;
+        }
+        miniSize = size;
 
         Log.d(TAG,"----------setting buffer size is(miniSize) = "+miniSize);
-        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, miniSize);
+        mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, sampleFrequency, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, miniSize);
         if(mAudioRecord.getState() == AudioRecord.STATE_UNINITIALIZED)
         {
             Log.d(TAG,"--------------Initialize AudioRecord success");
@@ -50,7 +60,7 @@ public class AudioRecorder extends Thread{
         {
             Log.e(TAG,"--------------Initialize AudioRecord Error");
         }
-        isInitialOk = true;
+        //isInitialOk = true;
     }
 
     public void setFFTFormat(){
@@ -68,7 +78,8 @@ public class AudioRecorder extends Thread{
     }
     public void close(){
         isClose = true;
-        if(mAudioRecord != null){
+        if(mAudioRecord != null && mAudioRecord.getState() != AudioRecord.STATE_UNINITIALIZED){
+            mAudioRecord.stop();
             mAudioRecord.release();
         }
     }
@@ -77,7 +88,7 @@ public class AudioRecorder extends Thread{
     public void run() {
         super.run();
         try{
-            while (!isInitialOk);
+            //while (!isInitialOk);
             mAudioRecord.startRecording();
             short[] pcmData = new short[miniSize];
             float[] fftResult = new float[miniSize];
@@ -105,7 +116,7 @@ public class AudioRecorder extends Thread{
                 }
             }
 
-            mAudioRecord.stop();
+            //mAudioRecord.stop();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -113,5 +124,146 @@ public class AudioRecorder extends Thread{
 
     public static interface CallBack{
         void onDataReceived(float[] pcmData, int validLength);
+    }*/
+
+    public static final int RECORDER_SAMPLE_RATE = 44100;
+    public static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_OUT_MONO;
+    public static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+
+
+    private static final int BUFFER_BYTES_ELEMENTS = 1024;
+    private static final int BUFFER_BYTES_PER_ELEMENT = RECORDER_AUDIO_ENCODING;
+    private static final int RECORDER_CHANNELS_IN = AudioFormat.CHANNEL_IN_MONO;
+
+
+    public static final int RECORDER_STATE_FAILURE = -1;
+    public static final int RECORDER_STATE_IDLE = 0;
+    public static final int RECORDER_STATE_STARTING = 1;
+    public static final int RECORDER_STATE_STOPPING = 2;
+    public static final int RECORDER_STATE_BUSY = 3;
+
+    private volatile int recorderState;
+
+    private final Object recorderStateMonitor = new Object();
+
+    private RecordingCallback recordingCallback;
+
+    public AudioRecorder recordingCallback(RecordingCallback recordingCallback) {
+        this.recordingCallback = recordingCallback;
+        return this;
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void onRecordFailure() {
+        recorderState = RECORDER_STATE_FAILURE;
+        finishRecord();
+    }
+
+    @Override
+    public void startRecord() {
+        if (recorderState != RECORDER_STATE_IDLE) {
+            return;
+        }
+
+        try {
+            recorderState = RECORDER_STATE_STARTING;
+
+            startRecordThread();
+        } catch (FileNotFoundException e) {
+            onRecordFailure();
+            e.printStackTrace();
+        }
+    }
+
+    private void startRecordThread() throws FileNotFoundException {
+
+        new Thread(new PriorityRunnable(Process.THREAD_PRIORITY_AUDIO) {
+
+            private void onExit() {
+                synchronized (recorderStateMonitor) {
+                    recorderState = RECORDER_STATE_IDLE;
+                    recorderStateMonitor.notifyAll();
+                }
+            }
+
+
+            @SuppressWarnings("ResultOfMethodCallIgnored")
+            @Override
+            public void runImpl() {
+                int bufferSize = Math.max(BUFFER_BYTES_ELEMENTS * BUFFER_BYTES_PER_ELEMENT,
+                        AudioRecord.getMinBufferSize(RECORDER_SAMPLE_RATE, RECORDER_CHANNELS_IN, RECORDER_AUDIO_ENCODING));
+
+                int size = 1024;
+                while(size < bufferSize){
+                    size = size * 2;
+                }
+                bufferSize = size;
+
+                AudioRecord recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, RECORDER_SAMPLE_RATE, RECORDER_CHANNELS_IN, RECORDER_AUDIO_ENCODING, bufferSize);
+                if(recorder.getState() == AudioRecord.STATE_UNINITIALIZED){
+                    Log.e(AudioRecorder.class.getSimpleName(),"*******************************Initialize audio recorder error");
+                    return;
+                }else{
+                    Log.d(AudioRecorder.class.getSimpleName(),"-------------------------------Initialize AudioRecord ok");
+                }
+                try {
+                    if (recorderState == RECORDER_STATE_STARTING) {
+                        recorderState = RECORDER_STATE_BUSY;
+                    }
+                    recorder.startRecording();
+
+                    short recordBuffer[] = new short[bufferSize];
+                    do {
+                        int bytesRead = recorder.read(recordBuffer, 0, bufferSize);
+
+                        if (bytesRead > 0) {
+                            recordingCallback.onDataReady(recordBuffer);
+                        } else {
+                            Log.e(AudioRecorder.class.getSimpleName(), "error: " + bytesRead);
+                            onRecordFailure();
+                        }
+                    } while (recorderState == RECORDER_STATE_BUSY);
+                } finally {
+                    recorder.release();
+                }
+                onExit();
+            }
+        }).start();
+    }
+
+    @Override
+    public void finishRecord() {
+        int recorderStateLocal = recorderState;
+        if (recorderStateLocal != RECORDER_STATE_IDLE) {
+            synchronized (recorderStateMonitor) {
+                recorderStateLocal = recorderState;
+                if (recorderStateLocal == RECORDER_STATE_STARTING
+                        || recorderStateLocal == RECORDER_STATE_BUSY) {
+
+                    recorderStateLocal = recorderState = RECORDER_STATE_STOPPING;
+                }
+
+                do {
+                    try {
+                        if (recorderStateLocal != RECORDER_STATE_IDLE) {
+                            recorderStateMonitor.wait();
+                        }
+                    } catch (InterruptedException ignore) {
+                        /* Nothing to do */
+                    }
+                    recorderStateLocal = recorderState;
+                } while (recorderStateLocal == RECORDER_STATE_STOPPING);
+            }
+        }
+    }
+
+
+    @Override
+    public boolean isRecording() {
+        return recorderState != RECORDER_STATE_IDLE;
+    }
+
+    public interface RecordingCallback {
+        void onDataReady(short[] data);
     }
 }

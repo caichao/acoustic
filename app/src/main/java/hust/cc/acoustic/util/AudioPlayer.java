@@ -12,7 +12,7 @@ public class AudioPlayer {
 
     private AudioTrack mAudioTrack;
     private short[] mPCMData;
-    private static final int F0 = 15000;
+    private static final int F0 = 18000;
 
     public AudioPlayer(){
         initAudioPlayer();

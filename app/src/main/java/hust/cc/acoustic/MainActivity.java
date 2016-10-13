@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -21,8 +22,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import hust.cc.acoustic.util.AudioPlayerThread;
 import hust.cc.acoustic.util.AudioRecorder;
+import hust.cc.acoustic.util.DrawEvent;
 
-public class MainActivity extends AppCompatActivity implements AudioRecorder.CallBack {
+public class MainActivity extends AppCompatActivity{
 
     //***********************vars about ui part********************************
     @BindView(R.id.button)
@@ -34,10 +36,12 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.Cal
 
     private SurfaceHolder surfaceHolder;
     private boolean isSurfaceOn = false;
+    private DrawEvent drawEvent;
     //***********************non-ui part vars*********************************
     private AudioPlayerThread mAudioPlayerThread;
     private AudioRecorder mAudioRecorder;
     private float[] fft;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,66 +110,18 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.Cal
             btnRecord.setText(getString(R.string.button_text_pause));
         }else {
             if(mAudioRecorder != null){
-                mAudioRecorder.stopRecord();
+                //mAudioRecorder.stopRecord();
             }
             btnRecord.setText(getString(R.string.button_text_record));
         }
     }
     //*******************************ui related****************************************
     public void initUI() {
+        drawEvent = new DrawEvent();
         surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(new DrawEvent());
+        surfaceHolder.addCallback(drawEvent);
     }
 
-    @Override
-    public void onDataReceived(float[] pcmData, int validLength) {
-        synchronized (fft) {
-            fft = pcmData;
-        }
-    }
-
-
-
-    private class DrawEvent implements SurfaceHolder.Callback {
-
-        @Override
-        public void surfaceCreated(SurfaceHolder surfaceHolder) {
-            isSurfaceOn = true;
-        }
-
-        @Override
-        public void surfaceChanged(final SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-            final Paint p = new Paint();
-            final int Width = i1;
-            final int Height = i2;
-            new Thread() {
-                @Override
-                public void run() {
-                    // TODO Auto-generated method stub
-                    super.run();
-
-                    while (isSurfaceOn && fft != null) {
-                        if (surfaceHolder == null) return;
-                        Canvas c = surfaceHolder.lockCanvas(new Rect(0, 0, Width, Height));
-                        c.drawColor(Color.BLACK);
-                        p.setStrokeWidth(2);
-                        p.setColor(Color.RED);
-
-                        for (int i = 1; i < fft.length; i++) {
-                            p.setColor(Color.RED);
-                            c.drawLine(Width / 6 + fft[i], i - 1, Width / 6 + fft[i], i, p);
-                        }
-                        surfaceHolder.unlockCanvasAndPost(c);
-                    }
-                }
-            }.start();
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-            isSurfaceOn = false;
-        }
-    }
     //******************************non-ui part*************************************
 
     public void initParams() {
@@ -179,9 +135,10 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.Cal
     }
 
     public void initAudioRecord() {
-        mAudioRecorder = new AudioRecorder(this);
-        mAudioRecorder.start();
+        mAudioRecorder = new AudioRecorder();
+        mAudioRecorder.recordingCallback(drawEvent);
     }
+
 
     @Override
     protected void onStart() {
@@ -192,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorder.Cal
     protected void onStop() {
         super.onStop();
         mAudioPlayerThread.Pause();
-        mAudioRecorder.close();
+        mAudioRecorder.finishRecord();
         isSurfaceOn = false;
     }
 
