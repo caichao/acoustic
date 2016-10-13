@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import hust.cc.acoustic.R;
 import hust.cc.acoustic.computation.Complex;
 import hust.cc.acoustic.computation.FFT;
 
@@ -49,6 +50,7 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         private SurfaceHolder mSurfaceHolder;
         private int mDrawingWidth,mDrawingHeight;
         private Paint mPaint;
+        private Paint textPaint;
         private short[] data;
         private Canvas mCanvas;
         private boolean isDrawing = true;
@@ -57,6 +59,9 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         private int x;
         private int y;
         private int shift;
+        private int peak;
+        private float frequency;
+        private float deltF = 10.76666f;
         //FFT about
         private static final int DataSize = 4096;
         short[] pcmData ;
@@ -70,6 +75,10 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
             mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mPaint.setColor(Color.RED);
             mPaint.setStrokeWidth(2.0f);
+
+            textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            textPaint.setColor(Color.WHITE);
+            textPaint.setStrokeWidth(2.0f);
 
             complexData = new Complex[DataSize];
             for(int i = 0;i<complexData.length;i++){
@@ -99,12 +108,41 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
                 if(isRefresh){
                     isRefresh = false;
                     pcmData = data;
+                    //the following is fft result
                     fft.complexLization(complexData,pcmData);
                     fft.FFT(complexData);
                     fft.magnitude(complexData,fftResult);
                     draw(fftResult);
+
+                    //the following draw the original acoustic wave
+                    //drawLine(pcmData);
                     //Log.d(DrawEvent.class.getSimpleName(),"--------get notified message");
                 }
+            }
+        }
+
+        private void drawLine(short[] data){
+            try {
+                float scale = 1;
+                int axis = mDrawingHeight / 2;
+                int fresh = data.length / mDrawingWidth;
+                mCanvas = mSurfaceHolder.lockCanvas();
+                mCanvas.drawColor(Color.BLACK);
+                for (int i = 0; i < fresh; i++) {
+                    switch (i){
+                        case 0: mPaint.setColor(Color.RED);break;
+                        case 1: mPaint.setColor(Color.GREEN);break;
+                        case 2: mPaint.setColor(Color.WHITE);break;
+                    }
+                    for (int j = 1; j < mDrawingWidth; j++) {
+                        mCanvas.drawLine(j - 1, data[i * fresh + j - 1] * scale + axis, j, data[i * fresh + j]*scale + axis, mPaint);
+                    }
+                    //mCanvas.drawColor(Color.BLACK);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mSurfaceHolder.unlockCanvasAndPost(mCanvas);
             }
         }
 
@@ -113,16 +151,39 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
                 mCanvas = mSurfaceHolder.lockCanvas();
                 mCanvas.drawColor(Color.BLACK);
                 //mCanvas.drawLine(100,100,200,300,mPaint);
-                shift = data.length/2 - mDrawingWidth;
-                for(int i = shift; i< data.length/2;i++){
+
+                //shift = data.length/2 - mDrawingWidth;
+                //y = data.length / 2;
+
+                shift = 0;
+                y = mDrawingWidth;
+                for(int i = shift; i< y;i++){
                     mCanvas.drawLine(i-shift,mDrawingHeight,i-shift,(mDrawingHeight-data[i]*mDrawingHeight/32768),mPaint);
                 }
+                peak = findPeak(data);
+                frequency = peak * deltF;
+                if(peak > mDrawingWidth){
+                    peak = mDrawingWidth - 100;
+                }
+                mCanvas.drawText(String.valueOf(frequency),peak+5,mDrawingHeight/2,textPaint);
 
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
                 mSurfaceHolder.unlockCanvasAndPost(mCanvas);
             }
+        }
+
+        private int findPeak(float[] data){
+            float max = 0;
+            int index = 0;
+            for(int i = 300; i<data.length / 2;i++){
+                if(data[i] > max){
+                    max = data[i];
+                    index = i;
+                }
+            }
+            return index;
         }
     }
 }
