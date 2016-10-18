@@ -126,7 +126,7 @@ public class AudioRecorder implements IAudioRecorder{
         void onDataReceived(float[] pcmData, int validLength);
     }*/
 
-    public static final int RECORDER_SAMPLE_RATE = 44100;
+    public static final int RECORDER_SAMPLE_RATE = 48000;
     public static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_OUT_MONO;
     public static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
@@ -217,7 +217,7 @@ public class AudioRecorder implements IAudioRecorder{
                         int bytesRead = recorder.read(recordBuffer, 0, bufferSize);
 
                         if (bytesRead > 0) {
-                            recordingCallback.onDataReady(recordBuffer);
+                            recordingCallback.onDataReady(recordBuffer,bytesRead);
                         } else {
                             Log.e(AudioRecorder.class.getSimpleName(), "error: " + bytesRead);
                             onRecordFailure();
@@ -264,6 +264,6 @@ public class AudioRecorder implements IAudioRecorder{
     }
 
     public interface RecordingCallback {
-        void onDataReady(short[] data);
+        void onDataReady(short[] data, int bytelen);
     }
 }

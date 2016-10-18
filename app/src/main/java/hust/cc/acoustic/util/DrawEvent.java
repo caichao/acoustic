@@ -19,6 +19,8 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
     private int Width = 0;
     private int Height = 0;
     private DrawingThread mThread;
+
+    private static final String TAG = DrawEvent.class.getSimpleName();
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         mThread = new DrawingThread(surfaceHolder);
@@ -40,10 +42,12 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
     }
 
     @Override
-    public void onDataReady(short[] data) {
+    public void onDataReady(short[] data,int bytelen) {
         //Log.d(DrawEvent.class.getSimpleName(),"-------------byte length : "+data.length);
-        if(mThread != null)
+        if(mThread != null) {
             mThread.notifyDataChange(data);
+            //Log.d(TAG,"valid data length = "+bytelen); output 2048
+        }
     }
 
     private static class DrawingThread extends Thread{
@@ -63,9 +67,10 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         private float frequency;
         private float deltF = 10.76666f;
         //FFT about
-        private static final int DataSize = 4096;
+        private static final int DataSize = 2048;
         short[] pcmData ;
         float[] fftResult;
+        float[] fftHalf;
         FFT fft ;
         Complex[] complexData;
 
@@ -87,7 +92,8 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
             pcmData = new short[DataSize];
             fftResult = new float[DataSize];
             fft = new FFT(DataSize);
-
+            fftHalf = new float[DataSize/2];//only half result is valid
+            deltF = 48000 / DataSize;
         }
         public void updateWindow(int Width, int Height){
             this.mDrawingHeight = Height;
@@ -146,8 +152,15 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
             }
         }
 
+        /**
+         * draw the fft result;
+         * @param data
+         */
         private void draw(float[] data){
             try {
+
+                System.arraycopy(data,0,fftHalf,0,fftHalf.length);
+
                 mCanvas = mSurfaceHolder.lockCanvas();
                 mCanvas.drawColor(Color.BLACK);
                 //mCanvas.drawLine(100,100,200,300,mPaint);
@@ -156,11 +169,11 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
                 //y = data.length / 2;
 
                 shift = 0;
-                y = mDrawingWidth;
+                y = mDrawingWidth > fftHalf.length ? fftHalf.length : mDrawingHeight;
                 for(int i = shift; i< y;i++){
-                    mCanvas.drawLine(i-shift,mDrawingHeight,i-shift,(mDrawingHeight-data[i]*mDrawingHeight/32768),mPaint);
+                    mCanvas.drawLine(i-shift,mDrawingHeight,i-shift,(mDrawingHeight-fftHalf[i]*mDrawingHeight/32768),mPaint);
                 }
-                peak = findPeak(data);
+                peak = findPeak(fftHalf);
                 frequency = peak * deltF;
                 if(peak > mDrawingWidth){
                     peak = mDrawingWidth - 100;
@@ -177,7 +190,7 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         private int findPeak(float[] data){
             float max = 0;
             int index = 0;
-            for(int i = 300; i<data.length / 2;i++){
+            for(int i = 300; i<data.length;i++){
                 if(data[i] > max){
                     max = data[i];
                     index = i;
