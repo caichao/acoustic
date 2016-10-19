@@ -6,7 +6,11 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import hust.cc.acoustic.R;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import hust.cc.acoustic.computation.Complex;
 import hust.cc.acoustic.computation.FFT;
 
@@ -19,6 +23,7 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
     private int Width = 0;
     private int Height = 0;
     private DrawingThread mThread;
+    private boolean enableLog = false;
 
     private static final String TAG = DrawEvent.class.getSimpleName();
     @Override
@@ -46,11 +51,19 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         //Log.d(DrawEvent.class.getSimpleName(),"-------------byte length : "+data.length);
         if(mThread != null) {
             mThread.notifyDataChange(data);
-            //Log.d(TAG,"valid data length = "+bytelen); output 2048
+            //Log.d(TAG,"valid data length = "+bytelen); //output 2048
         }
     }
 
-    private static class DrawingThread extends Thread{
+    public void setEnableLog(){
+        if(!enableLog){
+            enableLog = false;
+            if(mThread != null)
+                mThread.enableLog();
+        }
+    }
+
+    private class DrawingThread extends Thread{
         private SurfaceHolder mSurfaceHolder;
         private int mDrawingWidth,mDrawingHeight;
         private Paint mPaint;
@@ -59,6 +72,7 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         private Canvas mCanvas;
         private boolean isDrawing = true;
         private boolean isRefresh = false;
+        private boolean isLog = false;
 
         private int x;
         private int y;
@@ -74,6 +88,11 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         FFT fft ;
         Complex[] complexData;
 
+        //moving average window;
+        int searchRange = 10;
+        int windowLength = 50;
+        private float[] filteredBand ;
+        private MovingAverage movingAverage;
 
         public DrawingThread(SurfaceHolder mSurfaceHolder){
             this.mSurfaceHolder = mSurfaceHolder;
@@ -94,6 +113,8 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
             fft = new FFT(DataSize);
             fftHalf = new float[DataSize/2];//only half result is valid
             deltF = 48000 / DataSize;
+            movingAverage = new MovingAverage(windowLength,searchRange);
+            filteredBand = new float[searchRange * 2+1];
         }
         public void updateWindow(int Width, int Height){
             this.mDrawingHeight = Height;
@@ -106,6 +127,11 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
             this.data = data;
             isRefresh = true;
         }
+
+        public void enableLog(){
+            isLog = true;
+        }
+
         @Override
         public void run() {
             super.run();
@@ -176,9 +202,18 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
                 peak = findPeak(fftHalf);
                 frequency = peak * deltF;
                 if(peak > mDrawingWidth){
-                    peak = mDrawingWidth - 100;
+                    peak = mDrawingWidth;
                 }
                 mCanvas.drawText(String.valueOf(frequency),peak+5,mDrawingHeight/2,textPaint);
+
+                System.arraycopy(fftHalf,peak - searchRange,filteredBand,0,filteredBand.length);
+                //movingAverage.add(filteredBand);
+                //searchEcho(peak,fftHalf);
+                //Log.d(">>>",movingAverage.getAverage().toString());
+                if(isLog){
+                    isLog = false;
+                    Log.d(TAG,">>>>>"+filteredBand.toString());
+                }
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -197,6 +232,83 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
                 }
             }
             return index;
+        }
+
+        private void searchEcho(int peak,float[] data){
+            int range = 20;
+            int threshold = 50;
+            int lowband = 0;
+            int highband = 0;
+            for(int i = 0; i < range ; i++){
+                if(data[peak - i] > threshold){
+                    lowband ++;
+                }
+                if(data[peak + i] > threshold){
+                    highband ++;
+                }
+            }
+            Log.d(TAG,"Lowband = "+lowband + " Highband="+highband);
+        }
+        private int searchEcho(float centerFrequency){
+
+
+            return 0;
+        }
+    }
+
+    private class MovingAverage{
+        private List<float[]> queue;
+        private int size;
+        private int searchRange;
+        private List<Float> average;
+        private float[] tmpData;
+        private int curIndex = 0;
+        private boolean isFilled = false;
+        public MovingAverage(int n, int searchRange){
+            this.size = n; // data matrix vector size
+            this.searchRange = searchRange; // data matrix type size
+            queue = new ArrayList<>();
+            average = new ArrayList<Float>(2 * searchRange + 1);
+            for(int i = 0 ; i < 2 * searchRange + 1 ; i++){
+                float[] data = new float[n];
+                queue.add(data);
+                average.add(0f);
+            }
+
+            //tmpData = new float[2*searchRange + 1];
+
+            Log.i(TAG,"!!!!!!!!!!!!!!quequ size="+queue.size());
+            Log.i(TAG,"!!!!!!!!!!!!!!list size="+average.size());
+        }
+
+        public void add(float[] data){
+            for(int i = 0;i<queue.size(); i++) {
+                tmpData = queue.get(i);
+                tmpData[curIndex] = data[i];
+            }
+            curIndex++;
+            if (curIndex >= this.size){
+                curIndex = 0;
+                isFilled = true;
+            }
+        }
+
+        public List<Float> getAverage(){
+            int averageIdx = 0;
+            float sum = 0;
+            if(isFilled)
+                averageIdx = size;
+            else
+                averageIdx = curIndex;
+            for(int i = 0 ; i < queue.size() ; i ++){
+                tmpData = queue.get(i);
+                for(int j = 0;j< tmpData.length; j++){
+                    sum += tmpData[j];
+                }
+                average.set(i,sum / averageIdx);
+            }
+
+            return average;
         }
     }
 }

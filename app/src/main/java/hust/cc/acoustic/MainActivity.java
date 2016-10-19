@@ -1,9 +1,5 @@
 package hust.cc.acoustic;
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,7 +7,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -31,7 +26,7 @@ import in.excogitation.zentone.library.ToneStoppedListener;
 import in.excogitation.zentone.library.ZenTone;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     //***********************vars about ui part********************************
     @BindView(R.id.button)
@@ -40,6 +35,8 @@ public class MainActivity extends AppCompatActivity{
     SurfaceView surfaceView;
     @BindView(R.id.btn_record)
     Button btnRecord;
+    @BindView(R.id.btn_log)
+    Button btnLog;
 
     private SurfaceHolder surfaceHolder;
     private boolean isSurfaceOn = false;
@@ -98,10 +95,11 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
-    private PlayToneThread playToneThread = new PlayToneThread(20000,1.0f);
+    private PlayToneThread playToneThread = new PlayToneThread(20000, 1.0f);
+
     @OnClick(R.id.button)
     public void onClickAudioPlay() {
-            isAudioPlayed = true;
+        isAudioPlayed = true;
         //if (button.getText().equals(getString(R.string.button_text_play))) {
             /*Toast.makeText(getApplicationContext(),"start audio",Toast.LENGTH_SHORT).show();
             ZenTone.getInstance().generate(20000, 10, 1, new ToneStoppedListener() {
@@ -112,12 +110,12 @@ public class MainActivity extends AppCompatActivity{
                     msg.sendToTarget();
                 }
             });*/
-            if(!playToneThread.isAlive()){
-                playToneThread.enablePlay();
-                playToneThread.start();
-                Toast.makeText(getApplicationContext(),"start audio",Toast.LENGTH_SHORT).show();
-            }
-            //button.setText(getString(R.string.button_text_pause));
+        if (!playToneThread.isAlive()) {
+            playToneThread.enablePlay();
+            playToneThread.start();
+            Toast.makeText(getApplicationContext(), "start audio", Toast.LENGTH_SHORT).show();
+        }
+        //button.setText(getString(R.string.button_text_pause));
         //}
         //
         /*else {
@@ -130,36 +128,44 @@ public class MainActivity extends AppCompatActivity{
 
     @OnClick(R.id.btn_record)
     public void onClickAudioRecord() {
-        if(btnRecord.getText().equals(getString(R.string.button_text_record))){
-            if(mAudioRecorder != null){
+        if (btnRecord.getText().equals(getString(R.string.button_text_record))) {
+            if (mAudioRecorder != null) {
                 mAudioRecorder.startRecord();
             }
             btnRecord.setText(getString(R.string.button_text_pause));
-        }else {
-            if(mAudioRecorder != null){
+        } else {
+            if (mAudioRecorder != null) {
                 //mAudioRecorder.stopRecord();
 
             }
             btnRecord.setText(getString(R.string.button_text_record));
         }
     }
+
+    @OnClick(R.id.btn_log)
+    public void onLog(){
+        if(drawEvent != null)
+            drawEvent.setEnableLog();
+    }
+
     //*******************************ui related****************************************
     public void initUI() {
         drawEvent = new DrawEvent();
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(drawEvent);
     }
-    private Handler myHandler = new Handler(){
+
+    private Handler myHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case AUDIO_PLAY_STOPPED:
-                    Toast.makeText(getApplicationContext(),"Audio Play over",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Audio Play over", Toast.LENGTH_SHORT).show();
                     ZenTone.getInstance().generate(20000, 10, 1.0f, new ToneStoppedListener() {
                         @Override
                         public void onToneStopped() {
-                            if(isAudioPlayed = true) {
+                            if (isAudioPlayed = true) {
                                 Message message = myHandler.obtainMessage();
                                 message.what = AUDIO_PLAY_STOPPED;
                                 message.sendToTarget();
