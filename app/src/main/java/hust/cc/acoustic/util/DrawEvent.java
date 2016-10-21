@@ -48,11 +48,10 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
 
     @Override
     public void onDataReady(short[] data,int bytelen) {
-        //Log.d(DrawEvent.class.getSimpleName(),"-------------byte length : "+data.length);
-        if(mThread != null) {
-            mThread.notifyDataChange(data);
-            //Log.d(TAG,"valid data length = "+bytelen); //output 2048
-        }
+
+            if(mThread != null)
+                mThread.notifyDataChange(data);
+
     }
 
     public void setEnableLog(){
@@ -81,7 +80,7 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         private float frequency;
         private float deltF = 10.76666f;
         //FFT about
-        private static final int DataSize = 2048;
+        private static final int DataSize = 4096;
         short[] pcmData ;
         float[] fftResult;
         float[] fftHalf;
@@ -93,6 +92,8 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
         int windowLength = 50;
         private float[] filteredBand ;
         private MovingAverage movingAverage;
+        private String logInfo;
+        private StringBuilder logBuilder;
 
         public DrawingThread(SurfaceHolder mSurfaceHolder){
             this.mSurfaceHolder = mSurfaceHolder;
@@ -115,6 +116,9 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
             deltF = 48000 / DataSize;
             movingAverage = new MovingAverage(windowLength,searchRange);
             filteredBand = new float[searchRange * 2+1];
+
+            logBuilder = new StringBuilder();
+            logInfo = new String();
         }
         public void updateWindow(int Width, int Height){
             this.mDrawingHeight = Height;
@@ -191,28 +195,42 @@ public class DrawEvent implements SurfaceHolder.Callback, AudioRecorder.Recordin
                 mCanvas.drawColor(Color.BLACK);
                 //mCanvas.drawLine(100,100,200,300,mPaint);
 
-                //shift = data.length/2 - mDrawingWidth;
+                /*shift = fftHalf.length/2 - mDrawingWidth;
                 //y = data.length / 2;
 
                 shift = 0;
-                y = mDrawingWidth > fftHalf.length ? fftHalf.length : mDrawingHeight;
+                y = mDrawingWidth > fftHalf.length ? fftHalf.length : mDrawingWidth;
                 for(int i = shift; i< y;i++){
                     mCanvas.drawLine(i-shift,mDrawingHeight,i-shift,(mDrawingHeight-fftHalf[i]*mDrawingHeight/32768),mPaint);
+                }*/
+
+                for(int i = 0; i< mDrawingWidth;i++){
+                    mCanvas.drawLine(mDrawingWidth-i,mDrawingHeight,mDrawingWidth-i,(mDrawingHeight-fftHalf[fftHalf.length-i-1]*mDrawingHeight/32768),mPaint);
                 }
+
+
                 peak = findPeak(fftHalf);
                 frequency = peak * deltF;
                 if(peak > mDrawingWidth){
                     peak = mDrawingWidth;
                 }
-                mCanvas.drawText(String.valueOf(frequency),peak+5,mDrawingHeight/2,textPaint);
+                mCanvas.drawText(String.valueOf(frequency),mDrawingWidth-100,mDrawingHeight/2,textPaint);
 
                 System.arraycopy(fftHalf,peak - searchRange,filteredBand,0,filteredBand.length);
                 //movingAverage.add(filteredBand);
                 //searchEcho(peak,fftHalf);
                 //Log.d(">>>",movingAverage.getAverage().toString());
+                /*float scale = 10.0f;
+                for(int i = 0;i<filteredBand.length;i++){
+                    mCanvas.drawLine((i-shift)* scale,mDrawingHeight,(i-shift)*scale,(mDrawingHeight-filteredBand[i]*mDrawingHeight/32768),mPaint);
+                }*/
                 if(isLog){
                     isLog = false;
-                    Log.d(TAG,">>>>>"+filteredBand.toString());
+                    logBuilder.delete(0,logBuilder.length());
+                    for(int i =0 ; i< filteredBand.length;i++){
+                        logBuilder.append(filteredBand[i]).append(" ");
+                    }
+                    Log.d(TAG,">>>>>"+logBuilder.toString());
                 }
 
             }catch (Exception e){
