@@ -5,4 +5,5 @@
     <string name="button_text_pause">Pause</string>
 
     <string name="button_text_record">Record</string>
+    <string name="title_activity_sample">SampleActivity</string>
 </resources>
