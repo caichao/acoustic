@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +43,7 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
     private String IP_ADDRESS = "IP_ADDRESS";
     private String ADDR_PORT = "ADDR_PORT";
     private String SETTING = "SETTING";
+    private String TAG = SampleActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +53,14 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
                 settingDialog();
+                fab.hide();
             }
         });
 
@@ -68,6 +71,13 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
     @OnClick(R.id.btn_start_send)
     public void startSendDataToServer(){
         isAllowedSend = true;
+        Toast.makeText(getApplicationContext(),"start send data to server",Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.btn_play)
+    public void startPlay(){
+        mAudioRecorder.startRecord();
+        Toast.makeText(getApplicationContext(),"start to play",Toast.LENGTH_SHORT).show();
     }
 
     //********************************* init **********************************************
@@ -75,6 +85,7 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
         commSocket = CommSocket.getInstance();
         mAudioRecorder = new AudioRecorder();
         mAudioRecorder.recordingCallback(this);
+
         isAllowedSend = false;
     }
 
@@ -133,8 +144,11 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
         }
     }
 
+
     @Override
-    public void onDataReady(short[] data) {
+    public void onDataReady(short[] data, int bytelen) {
+
+        //Log.d(TAG,"data length = "+bytelen);
         if(isAllowedSend){
             try {
                 commSocket.send(data);
