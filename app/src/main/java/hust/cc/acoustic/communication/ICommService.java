@@ -7,6 +7,6 @@ import java.io.IOException;
  */
 
 public interface ICommService {
-   void send(short[] data) throws IOException;
+   void send(short[] data) throws IOException, InterruptedException;
     void close() throws  IOException;
 }

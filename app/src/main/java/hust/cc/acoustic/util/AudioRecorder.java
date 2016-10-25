@@ -133,7 +133,7 @@ public class AudioRecorder implements IAudioRecorder{
 
     private static final int BUFFER_BYTES_ELEMENTS = 1024;
     private static final int BUFFER_BYTES_PER_ELEMENT = RECORDER_AUDIO_ENCODING;
-    private static final int RECORDER_CHANNELS_IN = AudioFormat.CHANNEL_IN_STEREO;
+    private static final int RECORDER_CHANNELS_IN = AudioFormat.CHANNEL_IN_MONO;
 
 
     public static final int RECORDER_STATE_FAILURE = -1;

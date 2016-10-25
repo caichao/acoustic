@@ -97,7 +97,7 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
         final EditText port = (EditText)layout.findViewById(R.id.ip_port);
 
         SharedPreferences setting = getSharedPreferences(SETTING, Context.MODE_PRIVATE);
-        String ipAddr = setting.getString(IP_ADDRESS," ");
+        String ipAddr = setting.getString(IP_ADDRESS," ").trim();
         int ipPort = setting.getInt(ADDR_PORT,-1);
 
         ip.setText(ipAddr);
@@ -109,7 +109,7 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
                 .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String ipAddress = ip.getText().toString();
+                        String ipAddress = ip.getText().toString().trim();
                         int ipPort = Integer.parseInt(port.getText().toString());
                         if(commSocket != null){
                             commSocket.setup(ipAddress,ipPort);
@@ -142,6 +142,8 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
         if(commSocket != null){
             commSocket.close();
         }
+
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
 
@@ -151,8 +153,10 @@ public class SampleActivity extends AppCompatActivity implements  AudioRecorder.
         //Log.d(TAG,"data length = "+bytelen);
         if(isAllowedSend){
             try {
-                commSocket.send(data);
-            } catch (IOException e) {
+                short[] mData = new short[data.length];
+                System.arraycopy(data,0,mData,0,data.length);
+                commSocket.send(mData);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

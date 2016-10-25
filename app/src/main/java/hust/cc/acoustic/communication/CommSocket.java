@@ -1,5 +1,7 @@
 package hust.cc.acoustic.communication;
 
+import android.util.Log;
+
 import java.io.DataOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -20,10 +22,14 @@ public class CommSocket extends Thread implements ICommService {
     private String ip;
     private int port;
 
+    private SocketFactory mSocketFactory;
+
     private volatile static CommSocket instance;
     private CommSocket(){};
     private BlockingQueue<short[]> queue ;
     private short[] pcm;
+
+    private static final String TAG = CommSocket.class.getSimpleName();
 
     public static CommSocket getInstance(){
         if(instance == null){
@@ -38,11 +44,14 @@ public class CommSocket extends Thread implements ICommService {
 
     public void init(String ip, int port){
         try {
-            mSocket = new Socket(ip,port);
-            mDataOutputStream = new DataOutputStream(mSocket.getOutputStream());
             isRunning = true;
-            queue = new LinkedBlockingQueue<short[]>();
-        } catch (IOException e) {
+            queue = new LinkedBlockingQueue<short[]>(10);
+            Log.d(TAG,"_________---------very important initialization");
+            mSocketFactory = new SocketFactory(SocketFactory.TYPE_UDP,this.ip,this.port);
+            /*mSocket = new Socket(ip,port);
+            mDataOutputStream = new DataOutputStream(mSocket.getOutputStream());*/
+            Log.d(TAG,"------------ get the socket instance ------");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -57,11 +66,12 @@ public class CommSocket extends Thread implements ICommService {
         while(isRunning){
             try {
                 pcm = queue.take();
-                if(mDataOutputStream != null ){
+                mSocketFactory.send(pcm);
+                /*if(mDataOutputStream != null ){
                     for(int i = 0;i<pcm.length;i++){
                         mDataOutputStream.writeShort(pcm[i]);
                     }
-                }
+                }*/
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -70,8 +80,10 @@ public class CommSocket extends Thread implements ICommService {
     }
 
     @Override
-    public void send(short[] data) throws IOException {
-        queue.add(data);
+    public void send(short[] data) throws IOException, InterruptedException {
+        short [] mData = new short[data.length];
+        System.arraycopy(data,0,mData,0,data.length);
+        queue.put(mData);
         /*if(mDataOutputStream != null){
             for(int i = 0 ; i < data.length ; i++){
                 mDataOutputStream.writeShort(data[i]);
@@ -83,10 +95,11 @@ public class CommSocket extends Thread implements ICommService {
     public void close() {
         try {
             isRunning = false;
-            if(mDataOutputStream != null)
+            mSocketFactory.close();
+            /*if(mDataOutputStream != null)
                 mDataOutputStream.close();
             if(mSocket != null)
-                mSocket.close();
+                mSocket.close();*/
         }catch (Exception e){
             e.printStackTrace();
         }
