@@ -11,8 +11,8 @@ public class FFT {
     private int Npart4_of_N_FFT=0;		//创建正弦函数表时取PI的1/4
     private float SIN_TABLE_of_N_FFT [] = null;
 
-    private static final double PI =  3.14159265358979323846264338327950288419716939937510;
-
+    //private static final double PI =  3.14159265358979323846264338327950288419716939937510;
+    private static final double PI = Math.PI;
     public FFT(int FFT_N)
     {
         Init_FFT(FFT_N);

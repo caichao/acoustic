@@ -6,4 +6,27 @@
 
     <string name="button_text_record">Record</string>
     <string name="title_activity_sample">SampleActivity</string>
+
+
+    <string name="hint_message_input">Please specify a name!</string>
+    <string name="notify_message_filename">Name</string>
+    <string name="button_start_txt">Start</string>
+    <string name="button_stop_txt">Stop</string>
+    <string name="button_save_txt">Save</string>
+    <string name="toast_start_recording">Start Recording!</string>
+    <string name="toast_record_over">Finish Recording!</string>
+    <string name="toast_start_save">Saving files on local disk!</string>
+    <string name="toast_save_complete">Complete saving</string>
+    <string name="hint_no_input">Please specify a name!</string>
+    <string name="notify_message_time">Please set the time(s)</string>
+    <string name="button_set_time">Set</string>
+    <string name="toast_set_time">Set time ok!</string>
+
+    <string name="button_pn">PN</string>
+    <string name="button_zc">ZC</string>
+    <string name="button_chirp">CHIRP</string>
+    <string name="button_zccode">ZC+CODE</string>
+    <string name="hint_repeat_time">retransmitting time</string>
+    <string name="hint_gap_sample">samples between adjacent transmission</string>
+    <string name="button_set_parameters">SET</string>
 </resources>

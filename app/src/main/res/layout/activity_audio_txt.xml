@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context="hust.cc.acoustic.AudioTxtActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/textview_seconds"
+            android:layout_width="274dp"
+            android:layout_height="55dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="@string/notify_message_time"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="146dp"
+            tools:layout_editor_absoluteY="70dp" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="63dp"
+            android:id = "@+id/button_set"
+            android:text="@string/button_set_time"
+
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+        <TextView
+            android:id="@+id/textview_notify"
+            android:layout_width="74dp"
+            android:layout_height="33dp"
+            android:text="@string/notify_message_filename"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="80dp"
+            tools:text="FileName" />
+
+        <EditText
+            android:id="@+id/textview_filename"
+            android:layout_width="274dp"
+            android:layout_height="55dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="@string/hint_message_input"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="146dp"
+            tools:layout_editor_absoluteY="70dp" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_start"
+            android:layout_width="106dp"
+            android:layout_height="67dp"
+            android:text="@string/button_start_txt"
+            tools:layout_editor_absoluteX="127dp"
+            tools:layout_editor_absoluteY="155dp"
+            tools:text="Start" />
+
+        <Button
+            android:id="@+id/button_save"
+            android:layout_width="103dp"
+            android:layout_height="59dp"
+            android:text="@string/button_save_txt"
+            tools:layout_editor_absoluteX="127dp"
+            tools:layout_editor_absoluteY="242dp"
+            tools:text="Save" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

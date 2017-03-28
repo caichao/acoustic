@@ -143,9 +143,6 @@ public class PlayToneThread extends Thread{
                 }*/
                 //audioTrack.play();
 
-
-
-
                 while (isPlaying) {
                     ret = audioTrack.write(toneTable, 0, toneTable.length);
                 }

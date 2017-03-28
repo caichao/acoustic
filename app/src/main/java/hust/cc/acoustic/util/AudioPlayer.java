@@ -15,6 +15,8 @@ public class AudioPlayer {
     private short[] mPCMData;
     private static final int F0 = 10000;
     private byte[] toneCode;
+    private static final String TAG = AudioPlayer.class.getSimpleName();
+
 
     public AudioPlayer(){
         initAudioPlayer();
@@ -39,11 +41,11 @@ public class AudioPlayer {
         int rate = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
         int minSize = AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO,
                         AudioFormat.ENCODING_PCM_16BIT);
-        Log.d(AudioPlayer.class.getSimpleName(),"************the rate is :"+rate);
+        Log.d(TAG,"************the rate is :"+rate);
         // Find a suitable buffer size
-        Log.d(AudioPlayer.class.getSimpleName(),"************minSize = "+minSize);
+        Log.d(TAG,"************minSize = "+minSize);
         int size = (int)commonMultiple(rate,F0)/2;
-        Log.d(AudioPlayer.class.getSimpleName(),"************ size = "+size);
+        Log.d(TAG,"************ size = "+size);
         //size = rate / F0;
         /*int sizes[] = {1024, 2048, 4096, 8192, 16384, 32768};
         int size = 0;
