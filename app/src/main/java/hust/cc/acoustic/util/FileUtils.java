@@ -37,18 +37,18 @@ public class FileUtils {
         }
     }
 
-    public static short[] readTxt(String name, int length){
+    public static double[] readTxt(String name, int length){
         String tmp = "";
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
-        short[] pcm = null;
+        double[] pcm = null;
         try{
             fileReader = new FileReader(new File(SDPATH + name));
             bufferedReader = new BufferedReader(fileReader);
-            pcm = new short[length];
+            pcm = new double[length];
             int i = 0;
             while ((tmp = bufferedReader.readLine()) != null){
-                pcm[i++] = (short) Integer.parseInt(tmp);
+                pcm[i++] = (short) Float.parseFloat(tmp);
             }
         }catch (Exception e){
             e.printStackTrace();

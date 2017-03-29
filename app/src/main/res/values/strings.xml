@@ -29,4 +29,6 @@
     <string name="hint_repeat_time">retransmitting time</string>
     <string name="hint_gap_sample">samples between adjacent transmission</string>
     <string name="button_set_parameters">SET</string>
+    <string name="message_not_implemented">Funtion not implemented yet!</string>
+    <string name="not_enough_input">Not enought input!</string>
 </resources>
