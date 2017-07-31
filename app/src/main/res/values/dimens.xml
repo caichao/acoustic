@@ -3,4 +3,10 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <!--  dimension for acoustic ruler -->
+    <dimen name="text_margin">20dp</dimen>
+    <dimen name="text_size">24sp</dimen>
+    <dimen name="seperate_margin">30dp</dimen>
+    <dimen name="super_text_size">64sp</dimen>
 </resources>

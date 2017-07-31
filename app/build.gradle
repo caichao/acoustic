@@ -31,7 +31,8 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.4.0'
     compile 'com.github.nisrulz:zentone:1.0.3'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
+    compile 'org.jetbrains:annotations-java5:15.0'
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    compile 'org.jetbrains:annotations-java5:15.0'
 }

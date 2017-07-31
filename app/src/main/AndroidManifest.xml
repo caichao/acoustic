@@ -35,22 +35,37 @@
             </intent-filter>
             -->
         </activity>
+
         <activity
             android:name=".AudioTxtActivity"
             android:label="@string/title_activity_sample"
             android:theme="@style/AppTheme.NoActionBar">
             >
-
-        </activity>
-        <activity android:name=".OFDMActivity"
-            android:label="OFDM signal generation"
-            android:theme="@style/AppTheme.NoActionBar"
-            >
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            -->
+        </activity>
+
+        <activity
+            android:name=".OFDMActivity"
+            android:label="OFDM signal generation"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".CoherentRecieverActivity" />
+        <activity
+            android:name=".RulerActivity"
+            android:label="@string/title_activity_ruler"
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
         </activity>
     </application>
 
