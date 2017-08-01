@@ -46,4 +46,9 @@
     <string name="parameter_setting_str">Parameters of Chirp signal</string>
     <string name="button_setting_str">Confirm Parameters</string>
     <string name="displacement_str">Displacement (cm):</string>
+    <string name="no_input_hint">Please specify the input!</string>
+    <string name="ip_notice_str">IP address </string>
+    <string name="port_notice_str">Port </string>
+    <string name="ip_hint_msg">192.16.0.1</string>
+    <string name="port_hint_msg">12345</string>
 </resources>

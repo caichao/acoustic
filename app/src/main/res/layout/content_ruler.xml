@@ -112,6 +112,7 @@
             />
     </LinearLayout>
     <Button
+        android:id="@+id/btn_set_parameters"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_setting_str"
@@ -141,4 +142,42 @@
         android:textSize="@dimen/super_text_size"
         android:textColor="@android:color/holo_orange_dark"
         />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ip_notice_str"
+            android:textSize="@dimen/text_size"
+            android:textColor="@android:color/holo_red_dark"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="@dimen/text_size"
+            android:hint="@string/ip_hint_msg"
+            android:paddingLeft="@dimen/text_margin"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/port_notice_str"
+            android:textSize="@dimen/text_size"
+            android:textColor="@android:color/holo_red_dark"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="@dimen/text_size"
+            android:hint="@string/port_hint_msg"
+            android:paddingLeft="@dimen/text_margin"/>
+    </LinearLayout>
 </LinearLayout>
