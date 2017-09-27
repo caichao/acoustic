@@ -177,8 +177,8 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
     void onButtonConfirmClicked(){
         //begin parse the input parameters
         //String tmp = mFminInput.getText().toString().trim();
-        signalGenerator = new SignalGenerator(fs, B, T, fmin);
-        x = signalGenerator.generateChirp();
+        //signalGenerator = new SignalGenerator(fs, B, T, fmin);
+        //x = signalGenerator.generateChirp();
 
         ToastMessage(startRecordingToast,Toast.LENGTH_SHORT);
         mAudioRecorder.startRecord();

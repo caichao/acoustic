@@ -28,11 +28,11 @@ public class  SignalGenerator {
     }*/
 
     /**
-     *
-     * @param fs : sampling frequency
-     * @param B : bandwidth
-     * @param T : period for the chirp signal
-     * @param fmin : initial frequency
+     * generate up chirp signal
+     * @param fs : sampling frequency, units in Hz
+     * @param B : bandwidth, units in Hz
+     * @param T : period for the chirp signal, units in seconds
+     * @param fmin : initial frequency, units in Hz
      * @return
      */
     public static short[] generateChirp(int fs, int B, float T, int fmin){
@@ -47,12 +47,31 @@ public class  SignalGenerator {
     }
 
     /**
+     *  generate down chirp signal
+     * @param fs : sampling frequency, units in Hz
+     * @param B : bandwidth, units in Hz
+     * @param T : periodic duration of the chirp signal, units in Seconds
+     * @param fmax : maxmimum frquency of the chirp signal, units in Hz
+     * @return
+     */
+    public static short[] generateDownChirp(int fs, int B, float T, int fmax){
+        int sampleLength = (int)(fs * T);
+        short[] pcm = new short[sampleLength];
+        double theta = 0;
+        for(int i = 0; i < sampleLength ; i++){
+            theta = 2 * pi * (fmax*i*1.0f/fs - B*i*i*1.0f/2/T/fs/fs);
+            pcm[i] = (short)(32767 * Math.cos(theta));
+        }
+        return pcm;
+    }
+
+    /**
      *
-     * @param fs : sampling frequency
-     * @param finitial : the intial frequency of multiple tones
-     * @param intervalFrequency : frequency gap between each tone
-     * @param duration : duration for the whole signal
-     * @param numberOfToneIndice : the number of the pure tones
+     * @param fs : sampling frequency, uinit in Hz
+     * @param finitial : the intial frequency of multiple tones, units in Hz
+     * @param intervalFrequency : frequency gap between each tone, uinits in Hz
+     * @param duration : duration for the whole signal, units in Seconds
+     * @param numberOfToneIndice : the number of the pure tones, Integer value, should be larger than zero
      * @return pcm data
      */
     public static short[] generateMultiplePureTone(int fs, int finitial, int intervalFrequency, float duration, int numberOfToneIndice){
@@ -75,5 +94,25 @@ public class  SignalGenerator {
         }
 
         return pcm;
+    }
+
+    /**
+     * generate fade in and fade out samples
+     * @param fs : sample frquency in Hz
+     * @param frquency : frquency of the pure tone signal, units in Hz
+     * @param sampleLength : the sample length for the chirp or pure tone signal
+     * @return
+     */
+    public static short[] generateFadeinFadeout(int fs, int frquency, int sampleLength){
+
+        short[] pcmShort = new short[sampleLength];
+        int ramp = sampleLength / 20;  // Amplitude ramp as a percent of sample count
+        double theta = 0;
+        for (int i = 0; i < ramp; ++i) {  // Ramp amplitude up (to avoid clicks)
+            // Ramp up to maximum
+            theta = 2 * pi * (frquency)*i*1.0f/fs;
+            pcmShort[i] = (short) (32767 * Math.cos(theta) / ramp);
+        }
+        return pcmShort;
     }
 }
