@@ -49,6 +49,13 @@
     <string name="no_input_hint">Please specify the input!</string>
     <string name="ip_notice_str">IP address </string>
     <string name="port_notice_str">Port </string>
-    <string name="ip_hint_msg">192.16.0.1</string>
+    <string name="ip_hint_msg">192.168.0.1</string>
     <string name="port_hint_msg">12345</string>
+    <string name="hint_error">Initialization error!</string>
+    <string name="hint_sucess">Initialization sucess!</string>
+    <string name="hint_input">Initialization error, not enough input!</string>
+    <string name="title_activity_audio_ranging">AudioRanging</string>
+
+
+    <string name="ruler_activity_title">AcousticRuler</string>
 </resources>

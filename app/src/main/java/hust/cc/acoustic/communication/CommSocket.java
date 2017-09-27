@@ -63,6 +63,7 @@ public class CommSocket extends Thread implements ICommService {
     public void run() {
         super.run();
         init(this.ip,this.port);
+        Log.d(TAG, "begin to send the packets");
         while(isRunning){
             try {
                 pcm = queue.take();
@@ -75,7 +76,6 @@ public class CommSocket extends Thread implements ICommService {
             }catch (Exception e){
                 e.printStackTrace();
             }
-
         }
     }
 

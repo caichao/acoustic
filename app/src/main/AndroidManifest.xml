@@ -26,16 +26,13 @@
             android:name=".SampleActivity"
             android:label="@string/title_activity_sample"
             android:theme="@style/AppTheme.NoActionBar">
-
-            <!--
-                <intent-filter>
+        <!--    <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             -->
         </activity>
-
         <activity
             android:name=".AudioTxtActivity"
             android:label="@string/title_activity_sample"
@@ -49,7 +46,6 @@
             </intent-filter>
             -->
         </activity>
-
         <activity
             android:name=".OFDMActivity"
             android:label="OFDM signal generation"
@@ -57,8 +53,9 @@
         <activity android:name=".CoherentRecieverActivity" />
         <activity
             android:name=".RulerActivity"
-            android:label="@string/title_activity_ruler"
+            android:label="@string/ruler_activity_title"
             android:theme="@style/AppTheme.NoActionBar">
+
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -67,6 +64,10 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:name=".AudioRanging"
+            android:label="@string/title_activity_audio_ranging"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
