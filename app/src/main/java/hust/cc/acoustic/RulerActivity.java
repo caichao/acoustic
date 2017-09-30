@@ -8,11 +8,19 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.util.Random;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -20,8 +28,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import hust.cc.acoustic.communication.CommSocket;
 import hust.cc.acoustic.computation.DSP;
+import hust.cc.acoustic.computation.Spectrum;
 import hust.cc.acoustic.signal.SignalGenerator;
 import hust.cc.acoustic.util.AudioRecorder;
+import hust.cc.acoustic.util.SpectrumGraph;
 
 public class RulerActivity extends AppCompatActivity implements AudioRecorder.RecordingCallback {
 
@@ -44,6 +54,9 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
     EditText mIPInput;
     @BindView(R.id.port_num)
     EditText mPortInput;
+    @BindView(R.id.graph)
+    SurfaceView mSurfaceView;
+
 
     private Toast mToast = null;
 
@@ -83,6 +96,10 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
     private AudioRecorder mAudioRecorder = null;
     private CommSocket mCommSocket = null;
 
+    //parameters for the plot view
+    SpectrumGraph mGraph;
+    private SurfaceHolder mSurfaceHolder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,10 +127,17 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
     }
 
     private void initParam(){
+        //mCommSocket = CommSocket.getInstance();
+        mGraph = new SpectrumGraph(fs);
+
+        mSurfaceHolder = mSurfaceView.getHolder();
+        mSurfaceHolder.addCallback(mGraph);
+
         mAudioRecorder = new AudioRecorder();
         mAudioRecorder.recordingCallback(this);
+        mAudioRecorder.recordingCallback(mGraph);
 
-        //mCommSocket = CommSocket.getInstance();
+        x = signalGenerator.generateChirp(fs, B, T, fmin);
     }
 
     @Override
@@ -132,6 +156,8 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
         int ipPort = setting.getInt(ADDR_PORT,-1);
         mIPInput.setText(ipAddr);
         mPortInput.setText(ipPort+"");
+
+        //----------------------------
     }
 
     /**
@@ -178,21 +204,34 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
         //begin parse the input parameters
         //String tmp = mFminInput.getText().toString().trim();
         //signalGenerator = new SignalGenerator(fs, B, T, fmin);
-        //x = signalGenerator.generateChirp();
 
         ToastMessage(startRecordingToast,Toast.LENGTH_SHORT);
         mAudioRecorder.startRecord();
     }
 
+    boolean isSynched = false;
+    int shiftIndex = 0;
+    int startIndex = 0;
+    int endIndex = 0;
+    //int mixSignalLength = x.length;
     @Override
     public void onDataReady(short[] data, int bytelen) {
         //Log.e(TAG, ""+bytelen);
         if(warnUpCount < warnUpThreshold){
             warnUpCount++;
+            Log.e(TAG,"Warm up ok");
         }else {
             try {
+                //Log.e(TAG, "xcorr"+DSP.xcorr(data, x));
+                if(isSynched == false){ // synchronization is only to be done once
+                    isSynched = true;
+                    shiftIndex = DSP.maxIndex(DSP.xcorr(data, x));
+                    Log.e(TAG,"synch ok");
+                }else {
+                    if(shiftIndex + x.length <= bytelen){
 
-                Log.e(TAG, "xcorr"+DSP.xcorr(data, x));
+                    }
+                }
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
@@ -202,4 +241,7 @@ public class RulerActivity extends AppCompatActivity implements AudioRecorder.Re
 
         }
     }
+
+
+    // the following snipt codes are used to test the graph, you should deleted it when release the ocde
 }

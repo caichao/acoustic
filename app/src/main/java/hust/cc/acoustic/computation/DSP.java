@@ -41,6 +41,42 @@ public class DSP
     /**
      * Convolves sequences a and b. The resulting convolution has length
      * a.length+b.length-1.
+     * a is the coefficient of the filter
+     * b is the PCM stream of the audio data
+     */
+    public static double[] conv(double[] a, short[] b)
+    {
+        double[] y = new double[a.length + b.length - 1];
+
+        for (int lag = 0; lag < y.length; lag++)
+        {
+            y[lag] = 0;
+
+            // where do the two signals overlap?
+            int start = 0;
+            // we can't go past the left end of (time reversed) a
+            if (lag > a.length - 1)
+                start = lag - a.length + 1;
+
+            int end = lag;
+            // we can't go past the right end of b
+            if (end > b.length - 1)
+                end = b.length - 1;
+
+            // System.out.println("lag = " + lag +": "+ start+" to " + end);
+            for (int n = start; n <= end; n++)
+            {
+                // System.out.println(" ai = " + (lag-n) + ", bi = " + n);
+                y[lag] += b[n] * a[lag - n];
+            }
+        }
+
+        return (y);
+    }
+
+    /**
+     * Convolves sequences a and b. The resulting convolution has length
+     * a.length+b.length-1.
      */
     public static double[] conv(double[] a, double[] b)
     {
@@ -498,6 +534,21 @@ public class DSP
                 y = a[x];
 
         return y;
+    }
+
+    /**
+     * return the max index of a
+     * @param a - the input array
+     * @return the maximum index
+     */
+    public static int maxIndex(int[] a){
+        int y = Integer.MAX_VALUE;
+        int idx = 0;
+        for(int i = 0 ; i < a.length ; i++){
+            if(a[idx] > a[i])
+                idx = i;
+        }
+        return  idx;
     }
 
     /**

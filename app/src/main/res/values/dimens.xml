@@ -9,4 +9,7 @@
     <dimen name="text_size">24sp</dimen>
     <dimen name="seperate_margin">30dp</dimen>
     <dimen name="super_text_size">64sp</dimen>
+
+    <!-- dimension for the graphics -->
+    <dimen name="graph_height">200dip</dimen>
 </resources>

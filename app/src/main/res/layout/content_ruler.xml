@@ -118,6 +118,11 @@
         android:text="@string/button_setting_str"
         android:textSize="@dimen/text_size"
         />
+    <!-- graph for the plotting -->
+    <SurfaceView
+        android:id = "@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/graph_height" />
 
     <View
         android:layout_width="match_parent"
@@ -162,6 +167,7 @@
             android:hint="@string/ip_hint_msg"
             android:paddingLeft="@dimen/text_margin"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

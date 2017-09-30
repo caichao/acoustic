@@ -64,4 +64,32 @@ public class FileUtils {
         }
         return pcm;
     }
+
+    public static double[] readFilterCoefficient(String name, int length){
+        String tmp = "";
+        FileReader fileReader = null;
+        BufferedReader bufferedReader = null;
+        double[] filterCoefficient = null;
+        try{
+            fileReader = new FileReader(new File(SDPATH + name));
+            bufferedReader = new BufferedReader(fileReader);
+            filterCoefficient = new double[length];
+            int i = 0;
+            while ((tmp = bufferedReader.readLine()) != null){
+                filterCoefficient[i++] = Double.parseDouble(tmp);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try{
+                if(bufferedReader!= null)
+                    bufferedReader.close();
+                if(fileReader != null)
+                    fileReader.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return filterCoefficient;
+    }
 }
